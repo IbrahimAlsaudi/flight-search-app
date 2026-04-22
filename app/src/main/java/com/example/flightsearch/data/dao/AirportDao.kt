@@ -13,9 +13,15 @@ import kotlinx.coroutines.flow.Flow
 data class AirportSearchResult(
     @ColumnInfo(name = "iata_code")
     val code: String,
-    val name: String
+    val name: String,
+    val isFavorite: Boolean = false
 )
 
+data class AirportSuggestion(
+    @ColumnInfo(name = "iata_code")
+    val code: String,
+    val name: String,
+)
 @Dao
 interface AirportDao {
 
@@ -27,15 +33,19 @@ interface AirportDao {
             "WHERE iata_code LIKE '%' || :query || '%' " +
             "OR name LIKE '%' || :query || '%' " +
             "ORDER BY passengers DESC")
-    fun getAirports(query: String): Flow<List<AirportSearchResult>>
+    fun getAirports(query: String): Flow<List<AirportSuggestion>>
 
     /**
      * Query to show all flights available for one airport.
      * Assumed that every airport can depart to any airport except for itself
      * */
-    @Query("SELECT iata_code, name FROM airport " +
-            "WHERE NOT iata_code = :departureCode " +
-            "ORDER BY passengers DESC")
-    fun getFlights(departureCode: String): Flow<List<AirportSearchResult>>
+    @Query("""SELECT iata_code, name, (SELECT EXISTS
+        (SELECT 1 FROM favorite
+        WHERE departure_code = :departureCode 
+        AND destination_code = airport.iata_code)) AS isFavorite
+         FROM airport 
+            WHERE NOT iata_code = :departureCode 
+            ORDER BY passengers DESC""")
+    fun getDestinations(departureCode: String): Flow<List<AirportSearchResult>>
 
 }
