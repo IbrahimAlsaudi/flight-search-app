@@ -24,6 +24,52 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
+
+
+@Composable
+fun FavoriteCard(
+    departureCode: String,
+    destinationCode: String,
+    deleteFavorite: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(Modifier.weight(1f)) {
+                FlightInfoSection(
+                    label = "DEPART",
+                    code = departureCode,
+
+                )
+                Spacer(Modifier.padding(vertical = 4.dp))
+                FlightInfoSection(
+                    label = "ARRIVE",
+                    code = destinationCode,
+
+                )
+            }
+            IconButton(onClick = deleteFavorite) {
+                Icon(
+                    imageVector = Icons.Filled.Star ,
+                    contentDescription = "Remove from favorites",
+                    tint = Color(0xFFFFD700)
+                )
+            }
+        }
+    }
+}
+
+
 @Composable
 fun FlightCard(
     departCode: String,
@@ -75,8 +121,8 @@ fun FlightCard(
 private fun FlightInfoSection(
     label: String,
     code: String,
-    name: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    name: String = "",
 ) {
     Column(modifier = modifier) {
         Text(
