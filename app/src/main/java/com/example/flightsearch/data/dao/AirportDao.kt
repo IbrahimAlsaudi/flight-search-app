@@ -30,10 +30,18 @@ interface AirportDao {
     /**
      * Query to show airports name and code based on the user input
      * */
-    @Query("SELECT iata_code, name FROM airport " +
-            "WHERE iata_code LIKE '%' || :query || '%' " +
-            "OR name LIKE '%' || :query || '%' " +
-            "ORDER BY passengers DESC")
+    @Query("""
+        SELECT iata_code, name FROM airport 
+        WHERE iata_code LIKE '%' || :query || '%' 
+        OR name LIKE '%' || :query || '%' 
+        ORDER BY 
+        CASE
+            WHEN iata_code = UPPER(:query) THEN 1
+            WHEN name LIKE :query || '%' THEN 2
+            ELSE 3
+        END,
+                passengers DESC
+            """)
     fun getAirports(query: String): Flow<List<SearchSuggestion>>
 
     /**

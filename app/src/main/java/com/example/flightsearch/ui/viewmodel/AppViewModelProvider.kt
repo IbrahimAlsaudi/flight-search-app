@@ -11,7 +11,8 @@ object AppViewModelProvider  {
     val factory: ViewModelProvider.Factory = viewModelFactory {
         initializer {
             MainViewModel(
-                flightRepository = flightApplication().container.flightRepository
+                flightRepository = flightApplication().container.flightRepository,
+                userPreferencesRepository = flightApplication().container.userPreferencesRepository
             )
         }
     }

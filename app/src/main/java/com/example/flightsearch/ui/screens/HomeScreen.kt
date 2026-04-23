@@ -1,5 +1,8 @@
 package com.example.flightsearch.ui.screens
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +14,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -167,12 +173,36 @@ private fun FavoriteList(
         contentPadding = PaddingValues(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(favorites) { favorite ->
-            FavoriteCard(
-                departureCode = favorite.departureCode,
-                destinationCode = favorite.destinationCode,
-                deleteFavorite = { onDeleteFavorite(favorite.departureCode, favorite.destinationCode) }
+        items(items = favorites,
+            key = {favorite -> "${favorite.departureCode}-${favorite.destinationCode}"}
+        ) { favorite ->
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { dismissValue ->
+                    if(dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                        onDeleteFavorite(favorite.departureCode, favorite.destinationCode)
+                        true
+                    } else {
+                        false
+                    }
+                }
             )
+            SwipeToDismissBox(
+                state = dismissState,
+                enableDismissFromStartToEnd = false,
+                backgroundContent = {},
+                modifier = Modifier.animateItem(
+                    fadeInSpec = null,
+                    fadeOutSpec = tween(durationMillis = 300),
+                    placementSpec = spring(stiffness = Spring.StiffnessLow)
+                )
+            ) {
+                FavoriteCard(
+                    departureCode = favorite.departureCode,
+                    destinationCode = favorite.destinationCode,
+                    deleteFavorite = { onDeleteFavorite(favorite.departureCode, favorite.destinationCode) },
+
+                )
+            }
         }
     }
 }
@@ -188,11 +218,15 @@ private fun AirportSuggestionList(
         contentPadding = PaddingValues(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(suggestions) { airport ->
+        items(
+            items = suggestions,
+            key = {it.code}
+        ) { suggestion ->
             MyListItem(
-                iataCode = airport.code,
-                name = airport.name,
-                onClick = { onAirportClick(airport) }
+                iataCode = suggestion.code,
+                name = suggestion.name,
+                onClick = { onAirportClick(suggestion) },
+                modifier = Modifier.animateItem()
             )
         }
     }
