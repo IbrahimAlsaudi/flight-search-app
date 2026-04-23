@@ -64,9 +64,9 @@ fun HomeScreen(
                 value = uiState.value.searchQuery,
                 onValueChanged = viewModel::onQueryChanged,
                 onSearchClicked = {
-                    if (uiState.value.searchQuery.isNotEmpty()) {
+
                         focusManager.clearFocus()
-                    }
+
                 },
                 onDeleteClicked = viewModel::onQueryDeleted,
                 modifier = Modifier.padding(horizontal = 16.dp)
